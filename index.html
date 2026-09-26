@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Una carta para ti 💙</title>
+
+  <style>
+    :root {
+      --blue: #1e90ff;
+      --dark-blue: #0a2463;
+      --light-blue: #87ceeb;
+      --gold: #ffd700;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Georgia", serif;
+      background: linear-gradient(135deg, #0a2463 0%, #247ba0 50%, #1e90ff 100%);
+      overflow: hidden;
+      color: white;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== SOBRE CERRADO ===== */
+    .envelope {
+      position: relative;
+      width: 300px;
+      height: 200px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.6s ease;
+      z-index: 10;
+    }
+
+    .envelope.opened {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.8);
+    }
+
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(135deg, #e8e8e8, #f5f5f5);
+      clip-path: polygon(0 0, 50% 60%, 100% 0, 100% 100%, 0 100%);
+      transform-origin: top;
+      transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .envelope.opened .envelope-flap {
+      transform: rotateX(180deg);
+    }
+
+    .envelope-body {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #ffffff 0%, #f0f8ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a2463;
+      font-size: 2rem;
+      font-weight: bold;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .envelope-text {
+      font-size: 1.2rem;
+      color: #1e90ff;
+    }
+
+    .open-hint {
+      font-size: 0.9rem;
+      color: #87ceeb;
+      animation: pulse 2s infinite;
+    }
+
+    /* ===== FLORES AZULES ===== */
+    .flowers-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      z-index: 5;
+    }
+
+    .flowers-container.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .flower {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .petal {
+      width: 40px;
+      height: 60px;
+      background: radial-gradient(ellipse at 30% 30%, #87ceeb, var(--blue));
+      border-radius: 50% 50% 50% 0;
+      position: absolute;
+      transform-origin: 0 60px;
+      box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .petal:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+
+    .petal1 { transform: rotate(0deg); }
+    .petal2 { transform: rotate(72deg); }
+    .petal3 { transform: rotate(144deg); }
+    .petal4 { transform: rotate(216deg); }
+    .petal5 { transform: rotate(288deg); }
+
+    .center {
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle at 30% 30%, #ffd700, #ffb700);
+      border-radius: 50%;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+
+    .stem {
+      width: 3px;
+      height: 80px;
+      background: linear-gradient(to bottom, #228b22, #1a6b1a);
+      margin-top: 20px;
+    }
+
+    /* ===== MODAL DE CARTA ===== */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 100;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .letter {
+      background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+      color: #0a2463;
+      padding: 40px;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--blue);
+      position: relative;
+      animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .letter::before {
+      content: "💙";
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      font-size: 1.5rem;
+    }
+
+    .letter::after {
+      content: "💙";
+      position: absolute;
+      bottom: 15px;
+      right: 20px;
+      font-size: 1.5rem;
+    }
+
+    .letter h2 {
+      text-align: center;
+      color: var(--blue);
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+
+    .letter p {
+      line-height: 1.8;
+      font-size: 1rem;
+      margin: 15px 0;
+      text-align: justify;
+    }
+
+    .letter .signature {
+      text-align: right;
+      margin-top: 30px;
+      color: var(--blue);
+      font-weight: bold;
+      font-style: italic;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: #0a2463;
+      transform: rotate(90deg);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(5deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .envelope {
+        width: 250px;
+        height: 170px;
+      }
+
+      .letter {
+        padding: 30px;
+        max-width: 90%;
+      }
+
+      .letter h2 {
+        font-size: 1.4rem;
+      }
+
+      .letter p {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- SOBRE -->
+    <div class="envelope" id="envelope">
+      <div class="envelope-flap"></div>
+      <div class="envelope-body">
+        <div style="font-size: 2.5rem;">💌</div>
+        <div class="envelope-text">Para ti</div>
+        <div class="open-hint">Haz clic para abrir</div>
+      </div>
+    </div>
+
+    <!-- FLORES -->
+    <div class="flowers-container" id="flowersContainer"></div>
+  </div>
+
+  <!-- MODAL CON CARTAS -->
+  <div class="modal" id="modal">
+    <button class="close-btn" id="closeBtn">&times;</button>
+    <div class="letter" id="letterContent"></div>
+  </div>
+
+  <script>
+    const letters = [
+      {
+        title: "Mi amor",
+        text: "Quería decirte que cada día que despiertas a mi lado es el mejor regalo que la vida me pudo haber dado. Tu sonrisa ilumina mi mundo de una forma que no puedo explicar con palabras. Eres mi razón de ser feliz, mi inspiración, mi todo. Te amo más de lo que imaginas. 💙"
+      },
+      {
+        title: "Para ti",
+        text: "Hace poco tiempo que estamos juntos, pero siento como si te conociera de toda la vida. Tu risa, tu forma de ser, la manera en que me miras... todo en ti me enamorada cada día más. Quería que supieras que eres lo mejor que me ha pasado. Te amo con toda mi alma. 💙"
+      },
+      {
+        title: "Mi vida",
+        text: "No tengo palabras suficientes para expresar lo mucho que significas para mí. Eres mi compañero de aventuras, mi refugio seguro, mi persona favorita. Contigo quiero construir un futuro lleno de momentos hermosos y recuerdos inolvidables. Te amo infinitamente. 💙"
+      },
+      {
+        title: "Mi tesoro",
+        text: "Cada parte de ti me enamora. Tu bondad, tu inteligencia, tu forma de amar. Eres único, especial, irreemplazable. Quería decirte que no importa lo que pase, siempre estaré aquí para ti, amándote cada día más. Eres mi razón de luchar, mi razón de sonreír. 💙"
+      },
+      {
+        title: "Mi amor eterno",
+        text: "A veces me pregunto cómo tuve tanta suerte de encontrarte. Tu presencia transforma mis días grises en días llenos de color y alegría. Eres mi inspiración para ser mejor persona cada día. Te prometo amarte siempre, con cada latido de mi corazón. 💙"
+      }
+    ];
+
+    const envelope = document.getElementById("envelope");
+    const flowersContainer = document.getElementById("flowersContainer");
+    const modal = document.getElementById("modal");
+    const closeBtn = document.getElementById("closeBtn");
+    const letterContent = document.getElementById("letterContent");
+
+    // Abrir sobre
+    envelope.addEventListener("click", () => {
+      envelope.classList.add("opened");
+      flowersContainer.classList.add("show");
+      createFlowers();
+    });
+
+    // Crear flores
+    function createFlowers() {
+      flowersContainer.innerHTML = "";
+      const positions = [
+        { top: "10%", left: "15%" },
+        { top: "15%", left: "75%" },
+        { top: "50%", left: "5%" },
+        { top: "55%", left: "85%" },
+        { top: "75%", left: "25%" },
+        { top: "70%", left: "65%" }
+      ];
+
+      positions.forEach((pos, index) => {
+        const flower = document.createElement("div");
+        flower.className = "flower";
+        flower.style.top = pos.top;
+        flower.style.left = pos.left;
+        flower.style.animationDelay = `${index * 0.3}s`;
+
+        let petalsHTML = "";
+        for (let i = 1; i <= 5; i++) {
+          petalsHTML += `<div class="petal petal${i}" data-letter="${i - 1}"></div>`;
+        }
+
+        flower.innerHTML = `
+          ${petalsHTML}
+          <div class="center"></div>
+          <div class="stem"></div>
+        `;
+
+        // Evento en pétalos
+        flower.querySelectorAll(".petal").forEach((petal) => {
+          petal.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const letterIndex = petal.dataset.letter;
+            showLetter(letterIndex);
+          });
+        });
+
+        flowersContainer.appendChild(flower);
+      });
+    }
+
+    // Mostrar carta
+    function showLetter(index) {
+      const letter = letters[index];
+      letterContent.innerHTML = `
+        <h2>${letter.title}</h2>
+        <p>${letter.text}</p>
+        <div class="signature">Con todo mi amor, ella 💙</div>
+      `;
+      modal.classList.add("active");
+    }
+
+    // Cerrar modal
+    closeBtn.addEventListener("click", () => {
+      modal.classList.remove("active");
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("active");
+      }
+    });
+  </script>
+</body>
+</html>
